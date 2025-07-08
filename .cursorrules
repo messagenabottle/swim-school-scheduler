@@ -1,0 +1,275 @@
+# Swim School Scheduler Project Rules
+
+## Development Approach
+Follow Test-Driven Development (TDD):
+1. Write unit tests first
+2. Write minimal code to make tests pass
+3. Refactor while keeping tests green
+4. Document all functions and components
+
+## Testing Standards
+- Use Vitest for unit testing
+- Use React Testing Library for component testing
+- Test file naming: ComponentName.test.tsx or functionName.test.ts
+- Aim for 90%+ test coverage
+- Mock Firebase operations in tests
+- Test edge cases and error scenarios
+
+## Documentation Requirements
+- JSDoc comments for all functions and components
+- Include @param, @returns, @throws documentation
+- Add inline comments for complex logic
+- Document business rules and constraints
+- Include usage examples in JSDoc when helpful
+
+# Swim School Scheduler Project Rules
+
+## Project Context
+You are helping build a swim school scheduling application with React, TypeScript, Firebase, and Tailwind CSS. This is a test application focusing on core scheduling functionality for account administrators.
+
+## Code Standards
+
+### TypeScript
+- Always use TypeScript with strict typing
+- Import types from src/types/index.ts
+- Use proper interface definitions for all data structures
+- Prefer interfaces over types for object definitions
+- Use proper generic typing for Firebase operations
+
+### React Patterns
+- Use functional components with hooks (useState, useEffect)
+- Create custom hooks for reusable logic
+- Use proper dependency arrays in useEffect
+- Handle loading states with boolean flags
+- Always include error boundaries and error handling
+- Use React.memo for performance optimization where appropriate
+
+### Firebase Integration
+- Use Firebase v9+ modular SDK syntax
+- Import functions from src/lib/firestore.ts
+- Always handle Firebase errors gracefully
+- Use proper TypeScript typing for Firestore operations
+- Include loading states for all async operations
+- Use try-catch blocks for error handling
+
+### Styling Guidelines
+- Use Tailwind CSS exclusively for styling
+- Apply blue/aqua color scheme appropriate for swim school branding
+- Use these primary colors: blue-600, blue-500, sky-500, cyan-500
+- Ensure responsive design (sm:, md:, lg: breakpoints)
+- Use consistent spacing: p-4, m-4, gap-4 for standard layouts
+- Apply hover states: hover:bg-blue-600, hover:shadow-lg
+- Use consistent button styles: rounded-lg, px-4, py-2
+- Include focus states for accessibility: focus:outline-none focus:ring-2
+
+### Component Structure
+- Export components as default exports
+- Use descriptive prop interfaces
+- Include JSDoc comments for complex components
+- Group related components in the same file when appropriate
+- Use consistent naming: PascalCase for components, camelCase for functions
+
+### Form Handling
+- Use controlled components with useState
+- Include proper form validation
+- Show success/error messages
+- Reset forms after successful submission
+- Disable submit buttons during loading
+- Use proper input types (email, tel, date)
+
+### Data Management
+- Use the interfaces from src/types/index.ts
+- Handle empty states gracefully
+- Include loading indicators
+- Show meaningful error messages to users
+- Use optimistic updates where appropriate
+
+### Code Quality
+- Write self-documenting code with clear variable names
+- Use early returns to reduce nesting
+- Extract complex logic into utility functions
+- Keep components focused on single responsibilities
+- Use consistent naming conventions throughout
+- Add comprehensive JSDoc comments
+- Include inline comments for business logic
+- Write tests before implementation (TDD approach)
+
+## Testing Patterns to Always Include
+
+### Unit Test Structure
+```typescript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+
+describe('ComponentName', () => {
+  beforeEach(() => {
+    // Reset mocks
+  });
+
+  it('should handle expected behavior', () => {
+    // Test implementation
+  });
+
+  it('should handle error cases', () => {
+    // Error scenario testing
+  });
+});
+```
+
+### Firebase Mocking
+```typescript
+vi.mock('../lib/firebase', () => ({
+  db: {},
+  auth: {}
+}));
+
+vi.mock('../lib/firestore', () => ({
+  addInstructor: vi.fn(),
+  getInstructors: vi.fn()
+}));
+```
+
+### Documentation Template
+```typescript
+/**
+ * Brief description of what the function does
+ * 
+ * @param paramName - Description of parameter
+ * @returns Description of return value
+ * @throws Error description when applicable
+ * 
+ * @example
+ * ```typescript
+ * const result = functionName('example');
+ * console.log(result); // Expected output
+ * ```
+ */
+```
+
+## Common Patterns to Always Include
+
+### Loading States
+```typescript
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
+```
+
+### Error Handling
+```typescript
+try {
+  setLoading(true);
+  setError(null);
+  // operation
+} catch (err) {
+  setError(err instanceof Error ? err.message : 'An error occurred');
+} finally {
+  setLoading(false);
+}
+```
+
+### Firebase Operations
+```typescript
+import { collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+```
+
+### Button Styling
+```typescript
+className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+```
+
+### Form Input Styling
+```typescript
+className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+```
+
+### Card/Container Styling
+```typescript
+className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+```
+
+## Business Logic Requirements
+
+### Time Slot Rules
+- 15-minute increments only
+- 5-minute buffer built into logic (no visual indication)
+- Operating hours: 8:00 AM to 8:00 PM
+- Maximum 2 months advance booking
+
+### Appointment Types
+- Individual: one-time appointments
+- Recurring: weekly repeating appointments
+
+### User Roles
+- Focus on Account Admin functionality
+- Admin controls all scheduling (instructors can't self-schedule in test app)
+
+### Data Validation
+- Instructor name: required, minimum 2 characters
+- Client name: required, minimum 2 characters
+- Client email: required, valid email format
+- Phone: optional, basic format validation
+- Appointment date: required, not in past, within 2-month window
+
+## File Organization
+- Components: src/components/
+- Pages: src/pages/
+- Types: src/types/
+- Utilities: src/utils/
+- Firebase: src/lib/
+- Hooks: src/hooks/
+
+## When Creating New Components
+1. Write unit tests first (TDD approach)
+2. Create proper TypeScript interfaces for props
+3. Add comprehensive JSDoc documentation
+4. Include loading and error states
+5. Add proper error handling
+6. Style with Tailwind CSS following the guidelines above
+7. Export as default export
+8. Test edge cases (empty data, errors, loading states)
+9. Mock external dependencies in tests
+10. Achieve high test coverage
+
+## Performance Considerations
+- Use React.memo for components that receive stable props
+- Implement proper dependency arrays in useEffect
+- Avoid unnecessary re-renders
+- Use Firebase efficiently (don't over-fetch data)
+
+## Accessibility
+- Use semantic HTML elements
+- Include proper ARIA labels where needed
+- Ensure proper focus management
+- Use sufficient color contrast
+- Include keyboard navigation support
+```
+
+---
+
+## Benefits of These Rules
+
+**🎯 Consistency:** Every component will follow the same patterns
+**⚡ Speed:** No need to specify styling/structure requirements each time
+**🐛 Fewer Bugs:** Standard error handling and loading states
+**📱 Better UX:** Consistent styling and behavior across the app
+**🔒 Type Safety:** Proper TypeScript usage throughout
+
+## Updated Cursor Prompts (Shortened)
+
+With these rules in place, your prompts can be much shorter:
+
+**Example - Old Prompt:**
+```
+Create src/components/InstructorForm.tsx - A form to add new instructors
+- Simple form with name input field
+- Submit button that calls Firebase to add instructor  
+- Success/error messaging
+- Form validation (name required)
+- Use Tailwind CSS, proper TypeScript, and Firebase utilities
+- Include proper error handling and loading states
+```
+
+**Example - New Prompt:**
+```
+Create src/components/InstructorForm.tsx - A form to add new instructors with name input field, Firebase submission, and form validation.
