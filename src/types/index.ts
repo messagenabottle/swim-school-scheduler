@@ -61,6 +61,7 @@ export interface Client {
  * @property recurringId - (Optional) ID for recurring series
  * @property status - 'scheduled' or 'cancelled'
  * @property createdAt - Firestore Timestamp when the appointment was created
+ * @property blocks - Array of time blocks (e.g., ['10:00', '10:20'])
  *
  * @example
  * const appointment: Appointment = {
@@ -90,4 +91,5 @@ export interface Appointment {
   recurringId?: string;
   status: 'scheduled' | 'cancelled';
   createdAt: Timestamp;
+  blocks?: string[]; // Array of time blocks (e.g., ['10:00', '10:20'])
 } 

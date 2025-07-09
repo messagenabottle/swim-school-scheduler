@@ -64,21 +64,16 @@ export async function getClients(): Promise<Client[]> {
 
 /**
  * Adds an appointment, preventing double booking using block logic.
- * @param data - Appointment data (must include instructorId, startTime, blockCount)
+ * @param data - Appointment data (must include instructorId, startTime, blockCount, date)
  * @returns The new appointment's ID
  * @throws Error if double booking detected
  */
-export async function addAppointment(data: Partial<Appointment> & { instructorId: string; startTime: string; blockCount: number }): Promise<string> {
+export async function addAppointment(data: Partial<Appointment> & { instructorId: string; startTime: string; blockCount: number; date: string }): Promise<string> {
   // Get existing appointments for instructor on the same date
   const existing = await getAppointmentsByInstructor(data.instructorId, data.date);
   const requestedBlocks = getAppointmentBlocks(data.startTime, data.blockCount);
-  console.log('[addAppointment] data:', data);
-  console.log('[addAppointment] requestedBlocks:', requestedBlocks);
-  console.log('[addAppointment] existing:', existing);
   for (const appt of existing) {
-    console.log('[addAppointment] checking appt.blocks:', appt.blocks);
     if (appt.blocks && checkBlockConflict(requestedBlocks, appt.blocks)) {
-      console.log('[addAppointment] Double booking detected:', appt);
       throw new Error('Double booking');
     }
   }
@@ -112,10 +107,7 @@ export async function getAppointmentsByDate(date: string): Promise<Appointment[]
 export async function getAppointmentsByInstructor(instructorId: string, date: string): Promise<Appointment[]> {
   const snap = await getDocs(collection(db, 'appointments'));
   const mapped = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
-  console.log('[getAppointmentsByInstructor] instructorId:', instructorId, 'date:', date);
-  console.log('[getAppointmentsByInstructor] mapped:', mapped);
   const filtered = mapped.filter((a: any) => a.instructorId === instructorId && a.date === date);
-  console.log('[getAppointmentsByInstructor] filtered:', filtered);
   return filtered;
 }
 
