@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import Layout, { NavigationSection } from './components/Layout';
+import Layout from './components/Layout';
+import type { NavigationSection } from './components/Layout';
 import InstructorForm from './components/InstructorForm';
 import './App.css';
 
@@ -19,9 +20,8 @@ function App() {
     setShowInstructorForm(false);
   };
 
-  const handleInstructorSuccess = (instructorId: string) => {
-    // In a real app, this would fetch the instructor data
-    const newInstructor = { id: instructorId, name: 'New Instructor' };
+  const handleInstructorSuccess = (instructorId: string, name: string) => {
+    const newInstructor = { id: instructorId, name };
     setInstructors(prev => [...prev, newInstructor]);
     setShowInstructorForm(false);
   };
@@ -48,7 +48,6 @@ function App() {
             </div>
           </div>
         );
-
       case 'Schedule':
         return (
           <div className="space-y-6">
@@ -58,7 +57,6 @@ function App() {
             </div>
           </div>
         );
-
       case 'Instructors':
         return (
           <div className="space-y-6">
@@ -71,7 +69,6 @@ function App() {
                 Add Instructor
               </button>
             </div>
-            
             {showInstructorForm ? (
               <InstructorForm
                 onSuccess={handleInstructorSuccess}
@@ -98,7 +95,6 @@ function App() {
             )}
           </div>
         );
-
       case 'Clients':
         return (
           <div className="space-y-6">
@@ -108,7 +104,6 @@ function App() {
             </div>
           </div>
         );
-
       default:
         return null;
     }
