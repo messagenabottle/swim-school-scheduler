@@ -18,7 +18,22 @@ import { getAppointmentBlocks, checkBlockConflict } from '../utils/timeSlots';
  * @returns The new instructor's ID
  * @throws Error if add fails
  */
+// Fallback/mock for addInstructor in the browser demo
+function browserAddInstructor(data: { name: string }): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!data.name || data.name.length < 2) return reject(new Error('Name required'));
+    setTimeout(() => resolve('demo-' + Math.random().toString(36).slice(2, 8)), 800);
+  });
+}
+
 export async function addInstructor(data: { name: string }): Promise<string> {
+  // Always use the browser mock in development/demo mode
+  if (typeof window !== 'undefined') {
+    console.log('[addInstructor] Using browser mock implementation');
+    return browserAddInstructor(data);
+  }
+  // Use the real implementation in Node/test environments
+  console.log('[addInstructor] Using real Firebase implementation');
   if (!data.name || data.name.length < 2) throw new Error('Name required');
   const docRef = await addDoc(collection(db, 'instructors'), {
     name: data.name,
