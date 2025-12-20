@@ -26,13 +26,17 @@ function browserAddInstructor(data: { name: string }): Promise<string> {
   });
 }
 
+// Use real Firestore in browser when explicitly enabled via env flag or always in test (no window)
+const useRealFirestoreInBrowser = import.meta.env?.VITE_USE_FIRESTORE === 'true';
+
 export async function addInstructor(data: { name: string }): Promise<string> {
-  // Always use the browser mock in development/demo mode
-  if (typeof window !== 'undefined') {
+  // In browser runtime, use mock unless explicitly enabled. In tests, always use real.
+  const isTest = import.meta.env?.MODE === 'test';
+  if (typeof window !== 'undefined' && !useRealFirestoreInBrowser && !isTest) {
     console.log('[addInstructor] Using browser mock implementation');
     return browserAddInstructor(data);
   }
-  // Use the real implementation in Node/test environments
+  // Use the real implementation (Node/test or browser with VITE_USE_FIRESTORE=true)
   console.log('[addInstructor] Using real Firebase implementation');
   if (!data.name || data.name.length < 2) throw new Error('Name required');
   const docRef = await addDoc(collection(db, 'instructors'), {

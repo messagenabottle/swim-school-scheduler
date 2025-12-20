@@ -16,7 +16,7 @@ import { addInstructor } from '../lib/firestore';
  * ```
  */
 export interface InstructorFormProps {
-  onSuccess: (instructorId: string, name: string) => void;
+  onSuccess: (instructorId: string) => void;
   onCancel: () => void;
 }
 
@@ -100,7 +100,7 @@ const InstructorForm: React.FC<InstructorFormProps> = ({ onSuccess, onCancel }) 
       setErrors({});
       
       // Call success callback immediately
-      onSuccess(instructorId, name.trim());
+      onSuccess(instructorId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add instructor');
     } finally {

@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,3 +14,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+
+// Attempt anonymous sign-in on startup so Firestore rules requiring auth pass
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    signInAnonymously(auth).catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('[firebase] Anonymous sign-in failed:', err);
+    });
+  }
+});

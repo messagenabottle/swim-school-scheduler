@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import type { NavigationSection } from './components/Layout';
 import InstructorForm from './components/InstructorForm';
 import './App.css';
+import { getInstructors as fetchInstructors } from './lib/firestore';
 
 /**
  * Main App component showcasing the swim school scheduler components
@@ -14,6 +15,31 @@ function App() {
     { id: '1', name: 'Sarah Johnson' },
     { id: '2', name: 'Mike Chen' },
   ]);
+  const [loadingInstructors, setLoadingInstructors] = useState(false);
+  const [instructorsError, setInstructorsError] = useState<string | null>(null);
+
+  const useRealFirestore = import.meta.env.VITE_USE_FIRESTORE === 'true';
+
+  useEffect(() => {
+    if (!useRealFirestore) return;
+    let isCancelled = false;
+    async function load() {
+      try {
+        setLoadingInstructors(true);
+        setInstructorsError(null);
+        const data = await fetchInstructors();
+        if (!isCancelled) setInstructors(data.map((d: any) => ({ id: d.id, name: d.name })));
+      } catch (err) {
+        if (!isCancelled) setInstructorsError(err instanceof Error ? err.message : 'Failed to load instructors');
+      } finally {
+        if (!isCancelled) setLoadingInstructors(false);
+      }
+    }
+    load();
+    return () => {
+      isCancelled = true;
+    };
+  }, [useRealFirestore]);
 
   const handleSectionChange = (section: NavigationSection) => {
     setActiveSection(section);
@@ -78,7 +104,13 @@ function App() {
               <div className="bg-white rounded-lg shadow-md">
                 <div className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Instructors</h3>
-                  {instructors.length === 0 ? (
+                  {loadingInstructors && useRealFirestore && (
+                    <p className="text-gray-500">Loading instructors...</p>
+                  )}
+                  {instructorsError && useRealFirestore && (
+                    <p className="text-red-600">{instructorsError}</p>
+                  )}
+                  {!loadingInstructors && instructors.length === 0 ? (
                     <p className="text-gray-500">No instructors added yet.</p>
                   ) : (
                     <div className="space-y-3">
