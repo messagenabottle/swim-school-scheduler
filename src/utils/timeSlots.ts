@@ -176,14 +176,17 @@ export function generateBlockSlots(start: string = '08:00', end: string = '20:00
 
 /**
  * Returns the block start times occupied by an appointment.
- * The last block is considered occupied only up to the end of the block minus the buffer (e.g., 11:39:59), so the next block is available.
+ * All blocks within the appointment duration are reserved.
+ * No buffer time - appointments can be back-to-back.
  *
  * @param start - Appointment start time (HH:MM)
- * @param blockCount - Number of consecutive blocks (1, 2, or 3)
- * @returns Array of block start times
+ * @param blockCount - Number of consecutive blocks (1 = 20min, 2 = 40min, 3 = 60min)
+ * @returns Array of block start times that are occupied
  *
  * @example
- * getAppointmentBlocks('10:00', 2) // ['10:00', '10:20']
+ * getAppointmentBlocks('10:00', 1) // ['10:00'] - 20 minute appointment
+ * getAppointmentBlocks('10:00', 2) // ['10:00', '10:20'] - 40 minute appointment
+ * getAppointmentBlocks('10:00', 3) // ['10:00', '10:20', '10:40'] - 60 minute appointment
  */
 export function getAppointmentBlocks(start: string, blockCount: number): string[] {
   const blocks: string[] = [];
@@ -194,10 +197,6 @@ export function getAppointmentBlocks(start: string, blockCount: number): string[
     const blockM = mins % 60;
     blocks.push(`${blockH.toString().padStart(2, '0')}:${blockM.toString().padStart(2, '0')}`);
     mins += 20;
-  }
-  // Remove the last block from the occupied set for conflict checking, so the next block is available
-  if (blocks.length > 1) {
-    blocks.pop();
   }
   return blocks;
 }

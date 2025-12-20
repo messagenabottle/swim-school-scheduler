@@ -98,31 +98,60 @@ describe('generateBlockSlots', () => {
 });
 
 describe('getAppointmentBlocks', () => {
-  it('should return correct blocks for 1, 2, 3 block appointments', () => {
+  it('should return correct blocks for 1 block (20 minute) appointment', () => {
     expect(getAppointmentBlocks('10:00', 1)).toEqual(['10:00']);
-    expect(getAppointmentBlocks('10:20', 2)).toEqual(['10:20']);
-    expect(getAppointmentBlocks('11:00', 3)).toEqual(['11:00', '11:20']);
   });
-  it('should wrap around midnight if needed', () => {
-    expect(getAppointmentBlocks('23:40', 2)).toEqual(['23:40']);
+  it('should return correct blocks for 2 block (40 minute) appointment', () => {
+    expect(getAppointmentBlocks('10:00', 2)).toEqual(['10:00', '10:20']);
+    expect(getAppointmentBlocks('10:20', 2)).toEqual(['10:20', '10:40']);
+  });
+  it('should return correct blocks for 3 block (60 minute) appointment', () => {
+    expect(getAppointmentBlocks('11:00', 3)).toEqual(['11:00', '11:20', '11:40']);
+  });
+  it('should allow back-to-back appointments without conflict', () => {
+    // 10:00-10:20 and 10:20-10:40 should not conflict
+    const appt1 = getAppointmentBlocks('10:00', 1); // ['10:00']
+    const appt2 = getAppointmentBlocks('10:20', 1); // ['10:20']
+    expect(checkBlockConflict(appt1, appt2)).toBe(false);
+  });
+  it('should detect conflicts when appointments overlap', () => {
+    // 10:00-10:40 and 10:20-10:40 should conflict
+    const appt1 = getAppointmentBlocks('10:00', 2); // ['10:00', '10:20']
+    const appt2 = getAppointmentBlocks('10:20', 1); // ['10:20']
+    expect(checkBlockConflict(appt1, appt2)).toBe(true);
   });
 });
 
 describe('checkBlockConflict', () => {
-  it('should detect block conflicts for valid block times', () => {
-    // 11:00-11:40 (blocks: 11:00, 11:20, 11:40), 11:40-12:00 (block: 11:40)
-    expect(checkBlockConflict(['11:00', '11:20', '11:40'], ['11:40'])).toBe(true); // overlap at 11:40
-    // 11:00-11:40 (blocks: 11:00, 11:20, 11:40), 12:00-12:20 (block: 12:00)
-    expect(checkBlockConflict(['11:00', '11:20', '11:40'], ['12:00'])).toBe(false); // no overlap
-    // 11:40-12:00 (block: 11:40), 12:00-12:20 (block: 12:00)
-    expect(checkBlockConflict(['11:40'], ['12:00'])).toBe(false); // no overlap
+  it('should detect block conflicts when appointments overlap', () => {
+    // 11:00-12:00 (60 min) vs 11:40-12:00 (20 min) - conflict at 11:40
+    expect(checkBlockConflict(['11:00', '11:20', '11:40'], ['11:40'])).toBe(true);
+    // 11:00-12:00 (60 min) vs 12:00-12:20 (20 min) - no conflict, back-to-back
+    expect(checkBlockConflict(['11:00', '11:20', '11:40'], ['12:00'])).toBe(false);
+    // 11:40-12:00 (20 min) vs 12:00-12:20 (20 min) - no conflict, back-to-back
+    expect(checkBlockConflict(['11:40'], ['12:00'])).toBe(false);
+  });
+  it('should allow back-to-back appointments of same duration', () => {
+    // 10:00-10:20 and 10:20-10:40 - no conflict
+    expect(checkBlockConflict(['10:00'], ['10:20'])).toBe(false);
+  });
+  it('should detect conflicts when longer appointment overlaps shorter one', () => {
+    // 10:00-11:00 (60 min) overlaps with 10:40-11:00 (20 min)
+    expect(checkBlockConflict(['10:00', '10:20', '10:40'], ['10:40'])).toBe(true);
   });
 });
 
 describe('validateInstructorAvailability', () => {
   it('should validate all requested blocks are available', () => {
-    expect(validateInstructorAvailability(['10:00', '10:20'], ['09:40', '10:00'])).toBe(false); // 10:00 is occupied
-    expect(validateInstructorAvailability(['11:00', '11:20'], ['10:00', '10:20'])).toBe(true); // all available
-    expect(validateInstructorAvailability(['12:00'], ['12:00', '12:20'])).toBe(false); // 12:00 is occupied
+    // 10:00-10:40 requested but 10:00 is already occupied
+    expect(validateInstructorAvailability(['10:00', '10:20'], ['09:40', '10:00'])).toBe(false);
+    // 11:00-11:40 requested and all blocks available
+    expect(validateInstructorAvailability(['11:00', '11:20'], ['10:00', '10:20'])).toBe(true);
+    // 12:00-12:20 requested but 12:00 is occupied
+    expect(validateInstructorAvailability(['12:00'], ['12:00', '12:20'])).toBe(false);
+  });
+  it('should allow back-to-back appointments', () => {
+    // 10:00-10:20 and 10:20-10:40 can both exist
+    expect(validateInstructorAvailability(['10:20'], ['10:00'])).toBe(true);
   });
 }); 
