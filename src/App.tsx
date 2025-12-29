@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
 import type { NavigationSection } from './components/Layout';
 import InstructorForm from './components/InstructorForm';
+import InstructorList from './components/InstructorList';
 import './App.css';
 import { getInstructors as fetchInstructors } from './lib/firestore';
 
@@ -101,29 +102,7 @@ function App() {
                 onCancel={() => setShowInstructorForm(false)}
               />
             ) : (
-              <div className="bg-white rounded-lg shadow-md">
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Current Instructors</h3>
-                  {loadingInstructors && useRealFirestore && (
-                    <p className="text-gray-500">Loading instructors...</p>
-                  )}
-                  {instructorsError && useRealFirestore && (
-                    <p className="text-red-600">{instructorsError}</p>
-                  )}
-                  {!loadingInstructors && instructors.length === 0 ? (
-                    <p className="text-gray-500">No instructors added yet.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {instructors.map(instructor => (
-                        <div key={instructor.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium text-gray-900">{instructor.name}</span>
-                          <span className="text-sm text-gray-500">ID: {instructor.id}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <InstructorList />
             )}
           </div>
         );
